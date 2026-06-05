@@ -1,0 +1,25 @@
+{
+  "name": "ouro-store",
+  "version": "0.1.0",
+  "description": "Ouro Skill Store — Cloudflare Workers + Hono",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "migrate:init": "wrangler d1 migrations apply ouro-store-db",
+    "migrate:local": "wrangler d1 migrations apply ouro-store-db --local",
+    "type-check": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "hono": "^4.7.0",
+    "@hono/oauth-providers": "^0.6.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250301.0",
+    "wrangler": "^4.0.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0"
+  }
+}
