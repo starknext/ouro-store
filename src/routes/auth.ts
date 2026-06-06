@@ -90,8 +90,9 @@ auth.get('/github/callback', async (c) => {
   };
   const token = await signJwt(payload, c.env.JWT_SECRET);
 
-  // 设置 cookie 后重定向回首页
-  return c.html(`<!DOCTYPE html>
+  // 设置 httpOnly cookie 后跳转首页
+  return c.html(
+    `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -124,7 +125,10 @@ auth.get('/github/callback', async (c) => {
   </div>
   <script>setTimeout(function(){location.href='/'},2000)</script>
 </body>
-</html>`);
+</html>`,
+    200,
+    { 'Set-Cookie': `token=${token}; HttpOnly; Secure; Path=/; Max-Age=${86400 * 7}; SameSite=Lax` },
+  );
 });
 
 // 获取当前用户信息

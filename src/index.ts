@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { authMiddleware } from './middleware/auth';
+import { authMiddleware, verifyJwt } from './middleware/auth';
 import authRoutes from './routes/auth';
 import skillsRoutes from './routes/skills';
 import publishRoutes from './routes/publish';
@@ -130,8 +130,7 @@ footer .links a:hover{color:var(--text)}
   <nav>
     <a href="/">\u5168\u90E8\u6280\u80FD</a>
     <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
-    <a href="/api/auth/github/login" class="btn btn-ghost">\u767B\u5F55</a>
-    <a href="/api/auth/github/login" class="btn btn-primary">\u53D1\u5E03 Skill</a>
+    {{NAV_AUTH}}
   </nav>
 </div>
 </header>
@@ -263,8 +262,20 @@ fetchData();fetchStats();
 </body>
 </html>`;
 
-app.get('/', (c) => {
-  return c.html(PAGE_HTML);
+app.get('/', async (c) => {
+  const tokenCookie = c.req.header('Cookie')?.split(';').find(c => c.trim().startsWith('token='));
+  let loginUser: string | null = null;
+  if (tokenCookie) {
+    const token = tokenCookie.split('=')[1]?.trim();
+    if (token) {
+      const payload = await verifyJwt(token, c.env.JWT_SECRET);
+      if (payload) loginUser = payload.login;
+    }
+  }
+  const navAuth = loginUser
+    ? `<span style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text)">${loginUser}<a href="/api/auth/github/login" class="btn btn-primary">发布 Skill</a></span>`
+    : `<a href="/api/auth/github/login" class="btn btn-ghost">登录</a><a href="/api/auth/github/login" class="btn btn-primary">发布 Skill</a>`;
+  return c.html(PAGE_HTML.replace('{{NAV_AUTH}}', navAuth));
 });
 
 app.onError((err, c) => {
