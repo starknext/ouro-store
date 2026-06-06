@@ -12,6 +12,6 @@ binding = "DB"
 database_name = "ouro-store-db"
 database_id = "80b5c835-4541-449a-a99a-f85cdc174a78"
 
-# [[r2_buckets]]
-# binding = "SKILL_BUNDLES"
-# bucket_name = "ouro-skill-bundles"
+[[r2_buckets]]
+binding = "SKILL_BUNDLES"
+bucket_name = "ouro-skill-bundles"
