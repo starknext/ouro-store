@@ -90,13 +90,13 @@ auth.get('/github/callback', async (c) => {
   };
   const token = await signJwt(payload, c.env.JWT_SECRET);
 
-  // 返回 HTML 页面，方便复制 token
+  // 设置 cookie 后重定向回首页
   return c.html(`<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ouro Store — 登录成功</title>
+  <title>登录成功 — Ouro Store</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -105,37 +105,24 @@ auth.get('/github/callback', async (c) => {
       display: flex; justify-content: center; align-items: center; min-height: 100vh;
     }
     .card {
-      background: white; border-radius: 12px; padding: 32px; max-width: 520px; width: 90%;
+      background: white; border-radius: 12px; padding: 32px; max-width: 400px; width: 90%;
       box-shadow: 0 2px 12px rgba(0,0,0,0.08); text-align: center;
     }
     .avatar { width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 12px; display: block; }
     h2 { font-size: 18px; margin-bottom: 4px; }
-    .sub { color: #888; font-size: 13px; margin-bottom: 20px; }
-    .token-label { font-size: 12px; color: #666; margin-bottom: 6px; text-align: left; }
-    code {
-      display: block; background: #f4f4f4; border: 1px solid #e0e0e0; border-radius: 8px;
-      padding: 12px; font-size: 11px; word-break: break-all; line-height: 1.6;
-      user-select: all; cursor: text; text-align: left;
-    }
-    .hint { font-size: 12px; color: #999; margin-top: 12px; }
-    .btn {
-      display: inline-block; margin-top: 16px; padding: 8px 24px;
-      background: #24292f; color: white; border-radius: 6px;
-      text-decoration: none; font-size: 13px;
-    }
-    .btn:hover { background: #1b1f23; }
+    .sub { color: #666; font-size: 14px; margin-bottom: 20px; }
+    .success { color: #22c55e; font-size: 40px; margin-bottom: 8px; }
+    .hint { font-size: 12px; color: #999; margin-top: 16px; }
   </style>
 </head>
 <body>
   <div class="card">
-    <img class="avatar" src="${dbUser.avatar_url}" alt="avatar" />
+    <div class="success">✓</div>
     <h2>${dbUser.login}</h2>
-    <p class="sub">已登录 Ouro Skill Store</p>
-    <div class="token-label">Token（复制后粘贴回 ouro 管理平台）</div>
-    <code>${token}</code>
-    <p class="hint">已自动选中 — 直接复制后关闭此页面</p>
-    <a class="btn" href="javascript:void(0)" onclick="navigator.clipboard.writeText('${token}').then(()=>{this.textContent='已复制 ✓'})">复制 Token</a>
+    <p class="sub">登录成功，即将返回商店…</p>
+    <p class="hint">页面将在 2 秒后自动跳转</p>
   </div>
+  <script>setTimeout(function(){location.href='/'},2000)</script>
 </body>
 </html>`);
 });
