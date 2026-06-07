@@ -123,7 +123,15 @@ auth.get('/github/callback', async (c) => {
     <p class="sub">登录成功，即将返回商店…</p>
     <p class="hint">页面将在 2 秒后自动跳转</p>
   </div>
-  <script>setTimeout(function(){location.href='/'},2000)</script>
+  <script>
+    // 如果是 popup 窗口（有 opener），通过 postMessage 传 token 回父窗口
+    if (window.opener && window.opener !== window) {
+      window.opener.postMessage({ type: 'store-auth', token: '${token}' }, '*');
+      window.close();
+    } else {
+      setTimeout(function(){location.href='/'},2000);
+    }
+  </script>
 </body>
 </html>`,
     200,
