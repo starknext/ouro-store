@@ -196,11 +196,21 @@ export async function createPublishedSkill(
       exists.id,
     ).run();
 
-    await db.prepare(
-      'INSERT INTO skill_versions (skill_id, version, changelog, r2_key, content_hash, file_size) VALUES (?, ?, ?, ?, ?, ?)',
-    ).bind(
-      exists.id, manifest.version, cl, r2Key, contentHash, fileSize,
-    ).run();
+    // 如果版本已存在则更新，否则插入
+    const versionExists = await db.prepare(
+      'SELECT id FROM skill_versions WHERE skill_id = ? AND version = ?',
+    ).bind(exists.id, manifest.version).first<{ id: number }>();
+
+    if (versionExists) {
+      await db.prepare(
+        `UPDATE skill_versions SET changelog = ?, r2_key = ?, content_hash = ?, file_size = ?, created_at = datetime('now')
+         WHERE skill_id = ? AND version = ?`,
+      ).bind(cl, r2Key, contentHash, fileSize, exists.id, manifest.version).run();
+    } else {
+      await db.prepare(
+        'INSERT INTO skill_versions (skill_id, version, changelog, r2_key, content_hash, file_size) VALUES (?, ?, ?, ?, ?, ?)',
+      ).bind(exists.id, manifest.version, cl, r2Key, contentHash, fileSize).run();
+    }
 
     return { id: exists.id };
   }
