@@ -46,11 +46,12 @@ publish.post('/', requireAuth, async (c) => {
     name: body.name,
     version: body.version,
     type: 'function',
-    description: body.description,
+    short_description: body.shortDescription ?? '',
+    description: body.description ?? '',
     author: user.login,
     tags: body.tags ?? [],
     functions: body.functions ?? [],
-    dependencies: {},
+    dependencies: body.dependencies ?? {},
     compat: { 'ouro-min-version': body.compat_ouro_min ?? '1.0.0' },
   };
 

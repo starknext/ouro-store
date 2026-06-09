@@ -7,6 +7,7 @@ import type {
   SkillVersion,
   SkillRating,
   SkillManifest,
+  SkillFunction,
 } from '../models/skill';
 
 // ── D1 类型声明 ──
@@ -49,15 +50,30 @@ export async function getUserByGithubId(db: D1Database, githubId: number): Promi
 
 // ── Published Skills ──
 
+function parseFunctions(raw: string): SkillFunction[] {
+  try {
+    const parsed = JSON.parse(raw);
+    // 兼容旧格式: string[] -> SkillFunction[]
+    if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'string') {
+      return parsed.map((name: string) => ({ name, description: '' }));
+    }
+    return parsed;
+  } catch {
+    return [];
+  }
+}
+
 function rowToSkill(row: DbPublishedSkill, ratingAvg: number | null, ratingCount: number): PublishedSkill {
   return {
     id: row.id,
     name: row.name,
     latest_version: row.latest_version,
+    short_description: row.short_description ?? '',
     description: row.description,
     author: { login: '', avatar_url: '' },
     tags: JSON.parse(row.tags),
-    functions: JSON.parse(row.functions),
+    functions: parseFunctions(row.functions),
+    dependencies: (() => { try { return JSON.parse(row.dependencies ?? '{}'); } catch { return {}; } })(),
     home_url: row.home_url,
     compat_ouro_min: row.compat_ouro_min,
     downloads: row.downloads,
@@ -90,8 +106,8 @@ export async function searchSkills(
   const params: unknown[] = [];
 
   if (query) {
-    conditions.push('(s.name LIKE ? OR s.description LIKE ?)');
-    params.push(`%${query}%`, `%${query}%`);
+    conditions.push('(s.name LIKE ? OR s.short_description LIKE ? OR s.description LIKE ?)');
+    params.push(`%${query}%`, `%${query}%`, `%${query}%`);
   }
   if (tag) {
     conditions.push('s.tags LIKE ?');
@@ -162,14 +178,16 @@ export async function createPublishedSkill(
     // 更新已有 skill
     await db.prepare(
       `UPDATE published_skills SET
-        latest_version = ?, description = ?, tags = ?, functions = ?,
+        latest_version = ?, short_description = ?, description = ?, tags = ?, functions = ?, dependencies = ?,
         compat_ouro_min = ?, updated_at = datetime('now')
        WHERE id = ?`,
     ).bind(
       manifest.version,
+      manifest.short_description,
       manifest.description,
       JSON.stringify(manifest.tags),
       JSON.stringify(manifest.functions),
+      JSON.stringify(manifest.dependencies),
       manifest.compat['ouro-min-version'] ?? '1.0.0',
       exists.id,
     ).run();
@@ -185,15 +203,17 @@ export async function createPublishedSkill(
 
   const res = await db.prepare(
     `INSERT INTO published_skills
-      (name, latest_version, description, author_id, tags, functions, compat_ouro_min)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      (name, latest_version, short_description, description, author_id, tags, functions, dependencies, compat_ouro_min)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   ).bind(
     manifest.name,
     manifest.version,
+    manifest.short_description,
     manifest.description,
     userId,
     JSON.stringify(manifest.tags),
     JSON.stringify(manifest.functions),
+    JSON.stringify(manifest.dependencies),
     manifest.compat['ouro-min-version'] ?? '1.0.0',
   ).run();
 

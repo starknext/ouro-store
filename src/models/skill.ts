@@ -11,14 +11,22 @@ export interface User {
   created_at: string;
 }
 
+export interface SkillFunction {
+  name: string;
+  params?: string[];
+  description: string;
+}
+
 export interface PublishedSkill {
   id: number;
   name: string;
   latest_version: string;
+  short_description: string;
   description: string;
   author: { login: string; avatar_url: string };
   tags: string[];
-  functions: string[];
+  functions: SkillFunction[];
+  dependencies: Record<string, string>;
   home_url: string;
   compat_ouro_min: string;
   downloads: number;
@@ -58,10 +66,12 @@ export interface DbPublishedSkill {
   id: number;
   name: string;
   latest_version: string;
+  short_description: string;
   description: string;
   author_id: number;
   tags: string;
   functions: string;
+  dependencies: string;
   home_url: string;
   compat_ouro_min: string;
   downloads: number;
@@ -95,8 +105,10 @@ export interface PublishRequest {
   name: string;
   version: string;
   description: string;
+  shortDescription?: string;
   tags: string[];
-  functions: string[];
+  functions: SkillFunction[];
+  dependencies?: Record<string, string>;
   home_url?: string;
   compat_ouro_min?: string;
   changelog?: string;
@@ -115,10 +127,11 @@ export interface SkillManifest {
   name: string;
   version: string;
   type: string;
+  short_description: string;
   description: string;
   author: string;
   tags: string[];
-  functions: string[];
+  functions: SkillFunction[];
   dependencies: Record<string, string>;
   compat: { 'ouro-min-version'?: string };
 }
