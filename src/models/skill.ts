@@ -21,6 +21,7 @@ export interface PublishedSkill {
   id: number;
   name: string;
   latest_version: string;
+  changelog: string;
   short_description: string;
   description: string;
   author: { login: string; avatar_url: string };
@@ -66,6 +67,7 @@ export interface DbPublishedSkill {
   id: number;
   name: string;
   latest_version: string;
+  latest_changelog: string;
   short_description: string;
   description: string;
   author_id: number;
@@ -126,6 +128,7 @@ export interface RateRequest {
 export interface SkillManifest {
   name: string;
   version: string;
+  changelog: string;
   type: string;
   short_description: string;
   description: string;

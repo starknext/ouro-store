@@ -68,6 +68,7 @@ function rowToSkill(row: DbPublishedSkill, ratingAvg: number | null, ratingCount
     id: row.id,
     name: row.name,
     latest_version: row.latest_version,
+    changelog: row.latest_changelog ?? '',
     short_description: row.short_description ?? '',
     description: row.description,
     author: { login: '', avatar_url: '' },
@@ -169,7 +170,9 @@ export async function createPublishedSkill(
   r2Key: string,
   contentHash: string,
   fileSize: number,
+  changelog?: string,
 ): Promise<{ id: number }> {
+  const cl = changelog || manifest.changelog || '';
   const exists = await db.prepare(
     'SELECT id FROM published_skills WHERE name = ?',
   ).bind(manifest.name).first<{ id: number }>();
@@ -178,11 +181,12 @@ export async function createPublishedSkill(
     // 更新已有 skill
     await db.prepare(
       `UPDATE published_skills SET
-        latest_version = ?, short_description = ?, description = ?, tags = ?, functions = ?, dependencies = ?,
+        latest_version = ?, latest_changelog = ?, short_description = ?, description = ?, tags = ?, functions = ?, dependencies = ?,
         compat_ouro_min = ?, updated_at = datetime('now')
        WHERE id = ?`,
     ).bind(
       manifest.version,
+      cl,
       manifest.short_description,
       manifest.description,
       JSON.stringify(manifest.tags),
@@ -195,7 +199,7 @@ export async function createPublishedSkill(
     await db.prepare(
       'INSERT INTO skill_versions (skill_id, version, changelog, r2_key, content_hash, file_size) VALUES (?, ?, ?, ?, ?, ?)',
     ).bind(
-      exists.id, manifest.version, '', r2Key, contentHash, fileSize,
+      exists.id, manifest.version, cl, r2Key, contentHash, fileSize,
     ).run();
 
     return { id: exists.id };
@@ -203,11 +207,12 @@ export async function createPublishedSkill(
 
   const res = await db.prepare(
     `INSERT INTO published_skills
-      (name, latest_version, short_description, description, author_id, tags, functions, dependencies, compat_ouro_min)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (name, latest_version, latest_changelog, short_description, description, author_id, tags, functions, dependencies, compat_ouro_min)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   ).bind(
     manifest.name,
     manifest.version,
+    cl,
     manifest.short_description,
     manifest.description,
     userId,
@@ -222,7 +227,7 @@ export async function createPublishedSkill(
   await db.prepare(
     'INSERT INTO skill_versions (skill_id, version, changelog, r2_key, content_hash, file_size) VALUES (?, ?, ?, ?, ?, ?)',
   ).bind(
-    skillId, manifest.version, '', r2Key, contentHash, fileSize,
+    skillId, manifest.version, cl, r2Key, contentHash, fileSize,
   ).run();
 
   return { id: skillId };

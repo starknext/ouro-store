@@ -45,6 +45,7 @@ publish.post('/', requireAuth, async (c) => {
   const manifest: SkillManifest = {
     name: body.name,
     version: body.version,
+    changelog: body.changelog ?? '',
     type: 'function',
     short_description: body.shortDescription ?? '',
     description: body.description ?? '',
