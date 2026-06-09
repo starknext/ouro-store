@@ -218,8 +218,8 @@ function escMd(s){return esc(s).split('\\n').join('<br>');}
 
 // ── Grid View ──
 
-function showGrid(){document.getElementById('heroSection').style.display='';document.getElementById('tabsWrap').style.display='';document.getElementById('skillGrid').style.display='';document.getElementById('pagination').style.display='';document.getElementById('detailView').style.display='none';}
-function showDetail(){document.getElementById('heroSection').style.display='none';document.getElementById('tabsWrap').style.display='none';document.getElementById('skillGrid').style.display='none';document.getElementById('pagination').style.display='none';document.getElementById('detailView').style.display='block';}
+function showGrid(){document.getElementById('heroSection').style.display='';document.getElementById('tabsWrap').style.display='';document.getElementById('skillGrid').style.display='';document.getElementById('pagination').style.display='';document.getElementById('loadingEl').style.display='none';document.getElementById('emptyEl').style.display='none';document.getElementById('detailView').style.display='none';}
+function showDetail(){document.getElementById('heroSection').style.display='none';document.getElementById('tabsWrap').style.display='none';document.getElementById('skillGrid').style.display='none';document.getElementById('pagination').style.display='none';document.getElementById('loadingEl').style.display='none';document.getElementById('emptyEl').style.display='none';document.getElementById('detailView').style.display='block';}
 
 function renderGrid(){
   var g=document.getElementById('skillGrid'),l=document.getElementById('loadingEl'),e=document.getElementById('emptyEl'),p=document.getElementById('pagination');
